@@ -1,18 +1,79 @@
 const getBaseURL = () => {
-	return new URL('.', import.meta.url);
+  return new URL(".", import.meta.url);
 };
 
-
-//Ajouter multiple background texture, texture text, opacité, rapidé de l'animation, autres options, Revoir le placement
+//, texture text,  rapidé de l'animation
 class MyLogo extends HTMLElement {
-    style = `
-    @import url('https://fonts.googleapis.com/css2?family=Grey+Qo&display=swap');
+  style = `
+  @import url('https://fonts.googleapis.com/css2?family=Birthstone&family=Montserrat:wght@100&family=Roboto:wght@500&display=swap');
 
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+    
+    /* Hide default HTML checkbox */
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    /* The slider */
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+    
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+    
+    input:focus + .slider {
+      box-shadow: 0 0 1px #2196F3;
+    }
+    
+    input:checked + .slider:before {
+      -webkit-transform: translateX(26px);
+      -ms-transform: translateX(26px);
+      transform: translateX(26px);
+    }
+    
+    /* Rounded sliders */
+    .slider.round {
+      border-radius: 34px;
+    }
+    
+    .slider.round:before {
+      border-radius: 50%;
+    }
     #Global {
       display:flex;
    }
     
     #logo {
+      font-family ='Lobster Two', cursive;
       flex:1;
       padding: 1em;
       border:ridge black 2px;
@@ -34,7 +95,7 @@ class MyLogo extends HTMLElement {
                    0 10px 10px rgba(0,0,0,.2),
                    0 20px 20px rgba(0,0,0,.15);
     } 
-    
+
     #MyControls {
       flex:1;
       padding: 1em;
@@ -92,7 +153,13 @@ class MyLogo extends HTMLElement {
 
 
     `;
-    html = `
+  html = `
+    <h3>Afficher ou non les controles</h3>
+    <label class="switch">
+      <input id="show" type="checkbox"/>
+      <span class="slider round"></span>
+    </label>
+
     <div id="Global">
         <div id="MyControls">
         Couleur : <input type="color" id="selecteurCouleur">
@@ -102,7 +169,7 @@ class MyLogo extends HTMLElement {
         Taille : 5 <input type="range" val=40 min=5 max=100 
                           id="selecteurTaille"> 100
         
-                          <br>
+        <br>
 
         <label for="anim-select">Choose an animation : </label>
         <select name="animations_choice" id="anim_choice">
@@ -116,119 +183,198 @@ class MyLogo extends HTMLElement {
         
         <label for="anim-select">Changez le texte du logo : </label>
         <input type="text" id="logo_name" name="name" required
-       minlength="4" maxlength="40" size="10">
+         minlength="4" maxlength="40" size="10">
+
+        <br>
+        Opacité : 0 <input type="range" id="opacite" val=1 min=0 max=100
+                          id="selecteurTaille"> 1
+
+        <br>
+        <label for="font-select">Choose a font : </label>
+        <select name="fonts_choice" id="fonts_choice">
+        <option value="">--Please choose an option--</option>
+        <option value="font_1">Birthstone</option>
+        <option value="font_2">Montserrat</option>
+        <option value="font_3">Roboto</option>
+        </select>
+
+        <br>
+        <label for="backgorund-select">Choose a background : </label>
+        <select name="backgorund_choice" id="background_choice">
+        <option value="">--Please choose an option--</option>
+        <option value="background_1">Pattern 1</option>
+        <option value="background_2">Pattern 2</option>
+        </select>
        </div>
 
-       <div id="logo">mon logo 2</div>
-       </div> 
+       <div id="logo">
+        <p id="text-logo">mon logo 2</p>
+       </div>
+    </div> 
     `;
 
-    constructor() {
-        super();
-        // On crée le "shadow DOM"
-        this.attachShadow({ mode: "open" });
+  constructor() {
+    super();
+    // On crée le "shadow DOM"
+    this.attachShadow({ mode: "open" });
 
-        // récupérer les propriétés/attributs HTML
-        this.couleur = this.getAttribute("couleur");
-        if(!this.couleur) this.couleur = "black";
+    // récupérer les propriétés/attributs HTML
+    this.couleur = this.getAttribute("couleur");
+    if (!this.couleur) this.couleur = "black";
 
-        console.log("couleur récupérée = " + this.couleur);
+    console.log("couleur récupérée = " + this.couleur);
 
-        this.text = this.getAttribute("text");
-        this.animationClass = this.getAttribute("animation");
-        this.controls = this.getAttribute("controls");
-        this.size = this.getAttribute("taille");
-    }
+    this.text = this.getAttribute("text");
+    this.animationClass = this.getAttribute("animation");
+    this.controls = this.getAttribute("controls");
+    this.size = this.getAttribute("taille");
+  }
 
-    connectedCallback() {
-        // ici on instancie l'interface graphique etc.
-        this.shadowRoot.innerHTML = `<style>${this.style}</style>`
-            + this.html;
+  connectedCallback() {
+    // ici on instancie l'interface graphique etc.
+    this.shadowRoot.innerHTML = `<style>${this.style}</style>` + this.html;
 
-        this.logo = this.shadowRoot.querySelector("#logo");
-        this.myControls = this.shadowRoot.querySelector("#MyControls");
-        
-        // affecter les valeurs des attributs à la création
-        this.logo.style.color = this.couleur;
-        this.logo.classList.add(this.animationClass);
+    this.logo = this.shadowRoot.querySelector("#logo");
+    this.myControls = this.shadowRoot.querySelector("#MyControls");
+
+    // affecter les valeurs des attributs à la création
+    this.logo.style.color = this.couleur;
+    this.logo.classList.add(this.animationClass);
+
+    this.declareEcouteurs();
+
+    // On modifie les URLs relatifs
+    this.fixRelativeURLs();
+  }
+
+  fixRelativeURLs() {
+    let images = this.shadowRoot.querySelectorAll("img");
+    images.forEach((e) => {
+      console.log("dans le foreach");
+      let imagePath = e.getAttribute("src");
+      e.src = getBaseURL() + "/" + imagePath;
+    });
+
+    this.logo.style.background = "url(" + getBaseURL() + "images/flammes.jpg)";
+  }
+
+  declareEcouteurs() {
+    this.shadowRoot
+      .querySelector("#selecteurCouleur")
+      .addEventListener("input", (event) => {
+        this.changeCouleur(event.target.value);
+      });
+
+    this.shadowRoot
+      .querySelector("#selecteurTaille")
+      .addEventListener("input", (event) => {
+        this.changeSize(event.target.value);
+      });
+
+    this.shadowRoot
+      .querySelector("#opacite")
+      .addEventListener("input", (event) => {
+        this.changeOpacite(event.target.value);
+      });
+
+    this.shadowRoot
+      .querySelector("#anim_choice")
+      .addEventListener("change", (event) => {
+        this.changeAnimation(event.target.value);
+      });
+
+    this.shadowRoot
+      .querySelector("#background_choice")
+      .addEventListener("change", (event) => {
+        this.changeBackground(event.target.value);
+      });
 
 
-        this.declareEcouteurs();
+    this.shadowRoot
+      .querySelector("#fonts_choice")
+      .addEventListener("change", (event) => {
+        this.changeFont(event.target.value);
+      });
 
-        // On modifie les URLs relatifs
-        this.fixRelativeURLs();
-    }
+    this.shadowRoot
+      .querySelector("#logo_name")
+      .addEventListener("change", (event) => {
+        this.changeText(event.target.value);
+      });
 
-    fixRelativeURLs() {
-        let images = this.shadowRoot.querySelectorAll('img');
-        images.forEach((e) => {
-          console.log("dans le foreach")
-          let imagePath = e.getAttribute('src');
-            e.src = getBaseURL() + '/' + imagePath;
-        });
-    
-        this.logo.style.background = "url(" + getBaseURL() + "images/flammes.jpg)";
+    this.shadowRoot.querySelector("#show").addEventListener("click", () => {
+      if (
+        getComputedStyle(this.shadowRoot.querySelector("#MyControls"))
+          .display != "none"
+      ) {
+        this.shadowRoot.querySelector("#MyControls").style.display = "none";
+      } else {
+        this.shadowRoot.querySelector("#MyControls").style.display = "block";
       }
+    });
+  }
 
-    declareEcouteurs() {
-        this.shadowRoot.querySelector("#selecteurCouleur")
-            .addEventListener("input", (event) => {
-                this.changeCouleur(event.target.value);
-            });
-
-        this.shadowRoot.querySelector("#selecteurTaille")
-            .addEventListener("input", (event) => {
-                this.changeSize(event.target.value);
-            });
-
-        this.shadowRoot
-            .querySelector("select")
-            .addEventListener("change", (event) => {
-              this.changeAnimation(event.target.value);
-            });
-
-        this.shadowRoot.querySelector("#logo_name")
-            .addEventListener("change", (event) => {
-              this.changeText(event.target.value);
-            });
+  // Fonction
+  changeBackground(val) {
+    if (val == "background_1") {
+      this.logo.style.background =
+        "url(" + getBaseURL() + "images/background2.png)";
     }
-
-    // Fonction
-    changeCouleur(val) {
-        this.logo.style.color = val;
+    if (val == "background_2") {
+      this.logo.style.background =
+        "url(" + getBaseURL() + "images/background-pattern-3.png)";
     }
+  }
 
-    changeText(val){
-      this.logo.innerHTML = val;
-    }
+  changeOpacite(val) {
+    console.log(this.logo.style.opacity);
+    this.shadowRoot.querySelector("#text-logo").style.opacity = val / 100;
+  }
+  changeCouleur(val) {
+    this.logo.style.color = val;
+  }
 
-    changeSize(val) {
-        this.logo.style.fontSize = val + "px";
-    }
+  changeText(val) {
+    this.logo.innerHTML = val;
+  }
 
-    changeAnimation(val) {
-      if (val == "anim_1") {
-        console.log("anim_1");
-        this.setAttribute("animation","focus-in-expand")
-        this.shadowRoot
-        .querySelector("#logo").className = "focus-in-expand"; 
-        
-      }
-      if (val == "anim_2") {
-        console.log("anim_2");
-        this.setAttribute("animation","scale-up-center")
-        this.shadowRoot
-        .querySelector("#logo").className = "scale-up-center";
-  
-      }
-      if (val == "anim_3") {
-          console.log("anim_3");
-          this.setAttribute("animation","scale-down-center")
-          this.shadowRoot
-          .querySelector("#logo").className = "scale-down-center";
-    
-        }
+  changeSize(val) {
+    this.logo.style.fontSize = val + "px";
+  }
+
+  changeFont(val) {
+    if (val == "font_1") {
+      this.shadowRoot.querySelector("#logo").style.fontFamily =
+        "Birthstone , cursive";
+      console.log(this.logo.style.fontFamily);
     }
+    if (val == "font_2") {
+      this.shadowRoot.querySelector("#logo").style.fontFamily =
+        "Montserrat , sans-serif";
+      console.log(this.logo.style.fontFamily);
+    }
+    if (val == "font_3") {
+      this.shadowRoot.querySelector("#logo").style.fontFamily =
+        "Roboto , sans-serif";
+      console.log(this.logo.style.fontFamily);
+    }
+  }
+  changeAnimation(val) {
+    if (val == "anim_1") {
+      console.log("anim_1");
+      this.setAttribute("animation", "focus-in-expand");
+      this.shadowRoot.querySelector("#logo").className = "focus-in-expand";
+    }
+    if (val == "anim_2") {
+      console.log("anim_2");
+      this.setAttribute("animation", "scale-up-center");
+      this.shadowRoot.querySelector("#logo").className = "scale-up-center";
+    }
+    if (val == "anim_3") {
+      console.log("anim_3");
+      this.setAttribute("animation", "scale-down-center");
+      this.shadowRoot.querySelector("#logo").className = "scale-down-center";
+    }
+  }
 }
-
 customElements.define("my-logo", MyLogo);
