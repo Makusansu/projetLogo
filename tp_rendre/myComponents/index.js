@@ -2,11 +2,22 @@ const getBaseURL = () => {
 	return new URL('.', import.meta.url);
 };
 
+
+//Ajouter multiple background texture, texture text, opacité, rapidé de l'animation, autres options, Revoir le placement
 class MyLogo extends HTMLElement {
     style = `
     @import url('https://fonts.googleapis.com/css2?family=Grey+Qo&display=swap');
 
+    #Global {
+      display:flex;
+   }
+    
     #logo {
+      flex:1;
+      padding: 1em;
+      border:ridge black 2px;
+      width:40%;
+      text-align: center;
       font-size:40px;
       color:yellow;
       display:inline-block;
@@ -22,7 +33,20 @@ class MyLogo extends HTMLElement {
                    0 5px 10px rgba(0,0,0,.25),
                    0 10px 10px rgba(0,0,0,.2),
                    0 20px 20px rgba(0,0,0,.15);
-    }   
+    } 
+    
+    #MyControls {
+      flex:1;
+      padding: 1em;
+      float:left;
+      width:50%;
+      border: 2px ridge black;
+      background-color: #383E42;
+      padding: .5rem;
+      display: inline-block;
+      flex-direction: column;
+      color: #fefee2;
+    }
 
     .focus-in-expand {
       -webkit-animation: focus-in-expand 0.8s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
@@ -66,17 +90,20 @@ class MyLogo extends HTMLElement {
 
 @-webkit-keyframes scale-up-center{0%{-webkit-transform:scale(.5);transform:scale(.5)}100%{-webkit-transform:scale(1);transform:scale(1)}}@keyframes scale-up-center{0%{-webkit-transform:scale(.5);transform:scale(.5)}100%{-webkit-transform:scale(1);transform:scale(1)}}
 
+
     `;
     html = `
-    <div id="logo" >mon logo 2
-    <!-- <img src="./images/flammes.jpg" width=200> -->
-    </div>
-        <br>
+    <div id="Global">
+        <div id="MyControls">
         Couleur : <input type="color" id="selecteurCouleur">
+        
         <br>
+        
         Taille : 5 <input type="range" val=40 min=5 max=100 
                           id="selecteurTaille"> 100
-        <br>
+        
+                          <br>
+
         <label for="anim-select">Choose an animation : </label>
         <select name="animations_choice" id="anim_choice">
             <option value="">--Please choose an option--</option>
@@ -84,10 +111,16 @@ class MyLogo extends HTMLElement {
             <option value="anim_2">Scale up</option>
             <option value="anim_3">Scale Down</option>
         </select>
+        
         <br>
+        
         <label for="anim-select">Changez le texte du logo : </label>
         <input type="text" id="logo_name" name="name" required
        minlength="4" maxlength="40" size="10">
+       </div>
+
+       <div id="logo">mon logo 2</div>
+       </div> 
     `;
 
     constructor() {
@@ -113,9 +146,13 @@ class MyLogo extends HTMLElement {
             + this.html;
 
         this.logo = this.shadowRoot.querySelector("#logo");
+        this.myControls = this.shadowRoot.querySelector("#MyControls");
+        
         // affecter les valeurs des attributs à la création
         this.logo.style.color = this.couleur;
         this.logo.classList.add(this.animationClass);
+
+
         this.declareEcouteurs();
 
         // On modifie les URLs relatifs
@@ -130,7 +167,6 @@ class MyLogo extends HTMLElement {
             e.src = getBaseURL() + '/' + imagePath;
         });
     
-        //console.log(getBaseURL() +  "images/flammes.jpg")
         this.logo.style.background = "url(" + getBaseURL() + "images/flammes.jpg)";
       }
 
